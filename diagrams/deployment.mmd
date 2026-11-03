@@ -1,0 +1,26 @@
+graph TB
+    subgraph HOST["宿主机（Intel VT-x / AMD-V）"]
+        subgraph DOCKER["Docker 容器编排"]
+            NG["Nginx"]
+            BE["MalScope 后端 FastAPI"]
+            WK["任务 Worker Celery"]
+            MY[("MySQL 8.0")]
+            RS[("Redis")]
+        end
+        subgraph VMS["隔离沙箱区（独立网络）"]
+            VBOX["VirtualBox / KVM-QEMU"]
+            WIN["客户机 Windows 10/7"]
+            ISIM["INetSim / FakeNet"]
+            SUR["Suricata / tshark"]
+        end
+        STORE["加密样本存储卷"]
+    end
+    NG --> BE
+    BE --> MY
+    BE --> RS
+    WK --> RS
+    WK --> VBOX
+    VBOX --> WIN
+    WIN --> ISIM
+    WIN --> SUR
+    BE --> STORE

@@ -1,0 +1,95 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: malscope-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: malscope_root
+      MYSQL_DATABASE: malscope
+      MYSQL_USER: malscope
+      MYSQL_PASSWORD: malscope_pass
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pmalscope_root"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: malscope-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    container_name: malscope-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DEBUG: "false"
+      DATABASE_URL: mysql+pymysql://malscope:malscope_pass@mysql:3306/malscope?charset=utf8mb4
+      REDIS_URL: redis://redis:6379/0
+      USE_CELERY: "true"
+      SANDBOX_DRIVER: ${SANDBOX_DRIVER:-mock}
+      SECRET_KEY: ${SECRET_KEY:-please-change-me-in-production}
+      AES_MASTER_KEY: ${AES_MASTER_KEY:-}
+    volumes:
+      - ../backend/storage:/app/storage
+      - ../backend/rules:/app/rules
+      # 如需在容器内调用宿主机虚拟化，挂载对应可执行文件/socket（Linux/KVM 示例）
+      # - /var/run/libvirt/libvirt-sock:/var/run/libvirt/libvirt-sock
+    ports:
+      - "8000:8000"
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+  worker:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    container_name: malscope-worker
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      DATABASE_URL: mysql+pymysql://malscope:malscope_pass@mysql:3306/malscope?charset=utf8mb4
+      REDIS_URL: redis://redis:6379/0
+      USE_CELERY: "true"
+      SANDBOX_DRIVER: ${SANDBOX_DRIVER:-mock}
+      SECRET_KEY: ${SECRET_KEY:-please-change-me-in-production}
+    volumes:
+      - ../backend/storage:/app/storage
+      - ../backend/rules:/app/rules
+    command: ["celery", "-A", "app.workers.tasks.celery_app", "worker", "-l", "info", "-c", "2"]
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: malscope-nginx
+    restart: unless-stopped
+    depends_on:
+      - backend
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ../frontend/dist:/usr/share/nginx/html:ro
+    ports:
+      - "8080:80"
+
+volumes:
+  mysql_data:
+  redis_data:

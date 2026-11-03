@@ -1,0 +1,45 @@
+graph TB
+    subgraph FE["前端展示层"]
+        FE1["登录 / 总览大屏"]
+        FE2["样本库 / 上传"]
+        FE3["静态分析报告"]
+        FE4["动态行为时间线"]
+        FE5["ATT&CK 矩阵 / IOC"]
+        FE6["规则库 / 权限 / 审计"]
+    end
+    subgraph API["接入层"]
+        G["Nginx / 反向代理"]
+        JWT["JWT 认证 + RBAC 鉴权 + 审计拦截"]
+    end
+    subgraph BE["后端分析引擎层"]
+        S1["静态分析引擎"]
+        S2["动态沙箱编排器"]
+        S3["威胁情报引擎"]
+        S4["样本管理（AES-256）"]
+        S5["报告生成 HTML/PDF"]
+        Q["任务队列 Celery / 线程池"]
+    end
+    subgraph SB["沙箱执行层（严格隔离）"]
+        VM["虚拟化客户机 VirtualBox / KVM"]
+        AG["Guest Agent 行为采集"]
+        NET["网络诱捕 INetSim / FakeNet"]
+        EV["反逃逸模块"]
+    end
+    subgraph DS["数据存储层"]
+        DB[("MySQL 8.0 / SQLite")]
+        RD[("Redis")]
+        FS[("加密样本库")]
+    end
+    FE --> G --> JWT --> BE
+    Q --> S1
+    Q --> S2
+    S2 --> VM --> AG
+    VM --> NET
+    VM --> EV
+    S1 --> DB
+    S2 --> DB
+    S3 --> DB
+    S4 --> FS
+    S4 --> DB
+    S5 --> DB
+    Q <--> RD

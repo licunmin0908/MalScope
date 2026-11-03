@@ -1,0 +1,59 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ---- 环境与密钥 ----
+.env
+*.local.env
+
+# ---- 运行时数据（样本/报告/临时文件一律不入库）----
+backend/data/
+backend/storage/samples/
+backend/storage/quarantine/
+backend/storage/reports/
+backend/storage/tmp/
+backend/storage/logs/
+!backend/storage/.gitkeep
+
+# ---- Node / 前端 ----
+node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/npm-debug.log*
+
+# ---- IDE / OS ----
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# ---- 测试与工具产物 ----
+.playwright-mcp/
+*.png.bak
+
+# ---- 工具/个人配置 ----
+.commandcode/
+scripts/
+
+# ---- 学术与个人材料（不随项目发布）----
+论文要求.txt
+毕业设计任务书*.docx
+计算机专业本科毕业论文写作框架.docx
+参考论文_*.docx
+docs/毕业设计论文.*
+
+# ---- 编译器产物 ----
+*.obj
+*.o
+*.pdb
+*.ilk

@@ -1,0 +1,88 @@
+:root {
+  --ms-bg: #0f1419;
+  --ms-panel: #ffffff;
+  --ms-border: #e3e6ea;
+  --ms-text: #24292f;
+  --ms-muted: #7f8c8d;
+  --ms-mal: #c0392b;
+  --ms-sus: #e67e22;
+  --ms-ok: #27ae60;
+  --ms-unk: #7f8c8d;
+  --ms-primary: #2c5f8a;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #app {
+  height: 100%;
+  margin: 0;
+  font-family: "Microsoft YaHei", "PingFang SC", -apple-system, Arial, sans-serif;
+  color: var(--ms-text);
+  background: #f5f7fa;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.page-header h2 { margin: 0; font-size: 18px; }
+.page-header .sub { color: var(--ms-muted); font-size: 12px; margin-top: 4px; }
+
+.ms-card {
+  background: #fff;
+  border: 1px solid var(--ms-border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+}
+
+.mono { font-family: Consolas, "Courier New", monospace; font-size: 12.5px; word-break: break-all; }
+
+.tag-malicious { color: #fff; background: var(--ms-mal); border-color: var(--ms-mal); }
+.tag-suspicious { color: #fff; background: var(--ms-sus); border-color: var(--ms-sus); }
+.tag-clean { color: #fff; background: var(--ms-ok); border-color: var(--ms-ok); }
+.tag-unknown { color: #fff; background: var(--ms-unk); border-color: var(--ms-unk); }
+
+.sev-critical, .sev-high { color: var(--ms-mal); font-weight: 600; }
+.sev-medium { color: var(--ms-sus); }
+.sev-low, .sev-info { color: var(--ms-muted); }
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.stat-card {
+  background: #fff;
+  border: 1px solid var(--ms-border);
+  border-radius: 10px;
+  padding: 16px;
+}
+.stat-card .num { font-size: 26px; font-weight: 700; }
+.stat-card .lbl { color: var(--ms-muted); font-size: 12px; margin-top: 4px; }
+
+.login-bg {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #12263a 0%, #1f3b57 50%, #2c5f8a 100%);
+}
+.login-card {
+  width: 420px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 34px 36px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .35);
+}
+.login-card h1 { font-size: 20px; margin: 0 0 4px; }
+.login-card .sub { color: var(--ms-muted); font-size: 12px; margin-bottom: 22px; }
+
+.section-flags { font-family: Consolas, monospace; }
+.rwx { color: var(--ms-mal); font-weight: 700; }
+
+.scroll-y { max-height: 460px; overflow-y: auto; }
+.text-muted { color: var(--ms-muted); font-size: 12px; }

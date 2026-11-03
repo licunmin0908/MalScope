@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>{{ sample.original_filename }} 安全分析报告</title>
+<style>
+  :root { --mal:#c0392b; --sus:#e67e22; --ok:#27ae60; --unk:#7f8c8d; --line:#e3e6ea; }
+  * { box-sizing: border-box; }
+  body { font-family: "Microsoft YaHei","PingFang SC",Arial,sans-serif; color:#24292f; margin:0; background:#f5f7fa; }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 28px 32px 60px; background:#fff; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  h2 { font-size: 16px; border-left: 4px solid #2c3e50; padding-left: 10px; margin: 28px 0 12px; }
+  h3 { font-size: 14px; margin: 18px 0 8px; color:#34495e; }
+  .meta { color:#7f8c8d; font-size: 12px; margin-bottom: 18px; }
+  table { width:100%; border-collapse: collapse; font-size: 12.5px; margin-bottom: 8px; }
+  th, td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; word-break: break-all; }
+  th { background:#f0f3f7; font-weight:600; }
+  .kv td:nth-child(odd) { background:#fafbfc; width: 130px; font-weight:600; }
+  .badge { display:inline-block; padding:2px 10px; border-radius:10px; color:#fff; font-size:12px; }
+  .badge.malicious { background:var(--mal); }
+  .badge.suspicious { background:var(--sus); }
+  .badge.clean { background:var(--ok); }
+  .badge.unknown { background:var(--unk); }
+  .sev-critical, .sev-high { color:var(--mal); font-weight:600; }
+  .sev-medium { color:var(--sus); }
+  .sev-low, .sev-info { color:#7f8c8d; }
+  .score { font-size: 30px; font-weight: 700; }
+  .grid { display:grid; grid-template-columns: repeat(4,1fr); gap:10px; margin: 14px 0; }
+  .card { border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:#fafbfc; }
+  .card .num { font-size:20px; font-weight:700; }
+  .card .lbl { font-size:12px; color:#7f8c8d; }
+  ul.tips { margin:6px 0; padding-left: 20px; font-size:13px; line-height:1.9; }
+  .concl { background:#fff8e1; border-left:4px solid #f1c40f; padding:12px 14px; font-size:13px; line-height:1.8; }
+  .foot { margin-top: 34px; font-size: 11px; color:#95a5a6; border-top:1px dashed var(--line); padding-top:10px; }
+  code { background:#f3f4f6; padding:1px 5px; border-radius:4px; font-size:12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>{{ platform }} · 恶意样本安全分析报告</h1>
+  <div class="meta">生成时间：{{ generated_at }} ｜ 报告类型：静态 + 动态综合研判</div>
+
+  <h2>一、总体研判</h2>
+  <div class="grid">
+    <div class="card"><div class="num"><span class="badge {{ sample.threat_level }}">{{ top_level }}</span></div><div class="lbl">危害等级</div></div>
+    <div class="card"><div class="num score">{{ sample.risk_score }}</div><div class="lbl">风险评分 / 100</div></div>
+    <div class="card"><div class="num">{{ (sample.file_size / 1024) | round(1) }} KB</div><div class="lbl">文件大小</div></div>
+    <div class="card"><div class="num">{{ sample.file_kind | upper }}</div><div class="lbl">文件类型</div></div>
+  </div>
+  <div class="concl">{{ conclusion }}</div>
+
+  <h2>二、样本基本信息</h2>
+  <table class="kv">
+    <tr><td>文件名</td><td>{{ sample.original_filename }}</td><td>样本 ID</td><td><code>{{ sample.id }}</code></td></tr>
+    <tr><td>MD5</td><td><code>{{ sample.md5 }}</code></td><td>CRC32</td><td><code>{{ sample.crc32 or '-' }}</code></td></tr>
+    <tr><td>SHA1</td><td><code>{{ sample.sha1 }}</code></td><td>SHA256</td><td><code>{{ sample.sha256 }}</code></td></tr>
+    <tr><td>SSDEEP</td><td><code>{{ sample.ssdeep or '-' }}</code></td><td>imphash</td><td><code>{{ sample.imphash or '-' }}</code></td></tr>
+    <tr><td>文件熵</td><td>{{ '%.2f' % sample.entropy }}</td><td>加壳</td><td>{{ sample.packer or '未检出' }}</td></tr>
+    <tr><td>数字签名</td><td>{% if sample.is_signed %}已签名（{{ sample.signature_subject }}）{% else %}未签名{% endif %}</td><td>家族</td><td>{{ sample.family or '未标注' }}</td></tr>
+  </table>
+
+  {% if static %}
+  <h2>三、静态分析</h2>
+  <table class="kv">
+    <tr><td>文件类型描述</td><td>{{ static.file_type_desc }}</td><td>入口点</td><td><code>{{ static.entry_point or '-' }}</code></td></tr>
+    <tr><td>镜像基址</td><td><code>{{ static.image_base or '-' }}</code></td><td>编译时间</td><td>{{ static.compile_timestamp or '未知' }}</td></tr>
+    <tr><td>PDB 路径</td><td colspan="3"><code>{{ static.pdb_path or '无' }}</code></td></tr>
+  </table>
+
+  {% if sections %}
+  <h3>节区分析</h3>
+  <table>
+    <tr><th>名称</th><th>虚拟地址</th><th>虚拟大小</th><th>原始大小</th><th>熵</th><th>属性</th><th>可疑</th></tr>
+    {% for s in sections %}
+    <tr>
+      <td>{{ s.name or '(空)' }}</td><td>{{ '0x%x' % s.virtual_address }}</td>
+      <td>{{ s.virtual_size }}</td><td>{{ s.raw_size }}</td><td>{{ '%.2f' % s.entropy }}</td>
+      <td>{{ s.flags | join('/') }}</td>
+      <td>{% if s.is_suspicious %}<span class="sev-high">是</span>{% endif %} {{ s.suspicion_reason or '' }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+  {% if features %}
+  <h3>可疑特征</h3>
+  <table>
+    <tr><th>特征</th><th>级别</th><th>说明</th><th>ATT&amp;CK</th></tr>
+    {% for f in features %}
+    <tr>
+      <td>{{ f.name }}</td>
+      <td class="sev-{{ f.severity }}">{{ severity_cn.get(f.severity, f.severity) }}</td>
+      <td>{{ f.description }}</td>
+      <td>{{ f.attack or '' }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+  {% if imports %}
+  <h3>高危导入函数（节选）</h3>
+  <table>
+    <tr><th>DLL</th><th>函数</th><th>风险类别</th><th>级别</th></tr>
+    {% for i in imports %}
+    <tr><td>{{ i.dll }}</td><td>{{ i.function }}</td><td>{{ i.risk_category }}</td>
+        <td class="sev-{{ i.risk_level }}">{{ i.risk_level }}</td></tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+  {% if yara_matches %}
+  <h3>YARA 规则命中</h3>
+  <table>
+    <tr><th>规则</th><th>命名空间</th><th>描述</th><th>级别</th></tr>
+    {% for m in yara_matches %}
+    <tr><td>{{ m.rule_name }}</td><td>{{ m.namespace or '' }}</td><td>{{ m.description or '' }}</td>
+        <td>{{ m.severity or '' }}</td></tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+  {% endif %}
+
+  {% if dynamic %}
+  <h2>四、动态沙箱分析</h2>
+  <table class="kv">
+    <tr><td>沙箱驱动</td><td>{{ dynamic.sandbox_driver }}</td><td>虚拟机</td><td>{{ dynamic.vm_name or '-' }}</td></tr>
+    <tr><td>快照</td><td>{{ dynamic.snapshot or '-' }}</td><td>客户机</td><td>{{ dynamic.guest_os or '-' }}</td></tr>
+    <tr><td>运行时长</td><td>{{ dynamic.duration_sec }} 秒</td><td>行为判定</td><td>{{ level_cn.get(dynamic.verdict, dynamic.verdict) }}</td></tr>
+    <tr><td>反分析检测</td><td>{% if dynamic.anti_analysis_detected %}<span class="sev-high">已检测到</span>{% else %}未检测到{% endif %}</td>
+        <td>动态风险分</td><td>{{ dynamic.risk_score }}/100</td></tr>
+  </table>
+
+  {% if behavior_summary %}
+  <div class="grid">
+    <div class="card"><div class="num">{{ behavior_summary.process_count }}</div><div class="lbl">进程数</div></div>
+    <div class="card"><div class="num">{{ behavior_summary.file_event_count }}</div><div class="lbl">文件操作</div></div>
+    <div class="card"><div class="num">{{ behavior_summary.registry_event_count }}</div><div class="lbl">注册表操作</div></div>
+    <div class="card"><div class="num">{{ behavior_summary.c2_count }}</div><div class="lbl">C2 外联</div></div>
+  </div>
+  {% endif %}
+
+  {% if attck %}
+  <h3>MITRE ATT&amp;CK 技术映射</h3>
+  <table>
+    <tr><th>技术编号</th><th>技术名称</th></tr>
+    {% for t in attck %}<tr><td><code>{{ t.id }}</code></td><td>{{ t.name }}</td></tr>{% endfor %}
+  </table>
+  {% endif %}
+
+  {% if network_flows %}
+  <h3>网络行为</h3>
+  <table>
+    <tr><th>协议</th><th>目的地址</th><th>域名 / SNI / DNS</th><th>URL</th><th>C2</th></tr>
+    {% for f in network_flows[:60] %}
+    <tr>
+      <td>{{ f.protocol }}</td>
+      <td>{{ f.dst_ip or '' }}{% if f.dst_port %}:{{ f.dst_port }}{% endif %}</td>
+      <td>{{ f.domain or f.tls_sni or f.dns_query or '' }}</td>
+      <td>{{ f.url or '' }}</td>
+      <td>{% if f.is_c2 %}<span class="sev-critical">是（{{ f.c2_confidence }}%）</span>{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+  {% if file_events %}
+  <h3>文件系统行为</h3>
+  <table>
+    <tr><th>动作</th><th>路径</th><th>新路径</th><th>勒索</th><th>自启动</th></tr>
+    {% for f in file_events[:60] %}
+    <tr><td>{{ f.action }}</td><td>{{ f.path }}</td><td>{{ f.new_path or '' }}</td>
+        <td>{% if f.is_ransomware %}<span class="sev-critical">是</span>{% endif %}</td>
+        <td>{% if f.is_autorun %}是{% endif %}</td></tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+  {% if registry_events %}
+  <h3>注册表行为</h3>
+  <table>
+    <tr><th>动作</th><th>键路径</th><th>值</th><th>持久化</th></tr>
+    {% for r in registry_events[:60] %}
+    <tr><td>{{ r.action }}</td><td>{{ r.key_path }}</td><td>{{ r.value_name or '' }} = {{ r.value_data or '' }}</td>
+        <td>{% if r.is_persistence %}<span class="sev-high">是</span>{% endif %}</td></tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+  {% endif %}
+
+  <h2>五、IOC 威胁指标</h2>
+  {% if iocs %}
+  <table>
+    <tr><th>类型</th><th>值</th><th>来源</th><th>置信度</th><th>威胁分</th></tr>
+    {% for i in iocs[:120] %}
+    <tr><td>{{ i.ioc_type }}</td><td><code>{{ i.value }}</code></td><td>{{ i.source }}</td>
+        <td>{{ i.confidence }}</td><td>{{ i.threat_score }}</td></tr>
+    {% endfor %}
+  </table>
+  {% else %}<p>未提取到 IOC。</p>{% endif %}
+
+  <h2>六、处置建议</h2>
+  <ul class="tips">
+    {% for tip in suggestions %}<li>{{ tip }}</li>{% endfor %}
+  </ul>
+
+  <div class="foot">
+    本报告由 {{ platform }} 自动生成，所有样本分析均在隔离沙箱环境内完成，未对真实主机与网络造成影响。<br/>
+    报告仅供安全研判与教学研究使用。
+  </div>
+</div>
+</body>
+</html>

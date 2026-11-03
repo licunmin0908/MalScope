@@ -1,0 +1,7 @@
+VirtualAllocEx WriteProcessMemory CreateRemoteThread NtCreateThreadEx QueueUserAPC SetThreadContext
+IsDebuggerPresent CheckRemoteDebuggerPresent NtQueryInformationProcess OutputDebugString
+InternetOpenUrlA HttpSendRequestA URLDownloadToFileA WinHttpSendRequest
+RegSetValueExW CreateServiceW SchRpcRegisterTask
+CryptEncrypt BCryptEncrypt EncryptFileW
+MiniDumpWriteDump GetAsyncKeyState SetWindowsHookExW
+your files have been encrypted bitcoin payment decryption key

@@ -1,0 +1,197 @@
+{
+  "version": "1.0.0",
+  "description": "MalScope 安全知识库：可疑 API 分类、加壳器特征、恶意字符串规则、行为-ATT&CK 映射。",
+  "suspicious_apis": {
+    "process_injection": {
+      "level": "high",
+      "description": "进程注入（远程写入、创建远程线程、APC 注入、进程镂空）",
+      "attack": "T1055",
+      "apis": ["VirtualAllocEx", "WriteProcessMemory", "ReadProcessMemory", "CreateRemoteThread", "CreateRemoteThreadEx", "NtCreateThreadEx", "RtlCreateUserThread", "QueueUserAPC", "NtQueueApcThread", "SetThreadContext", "GetThreadContext", "Wow64SetThreadContext", "NtMapViewOfSection", "ZwMapViewOfSection", "NtUnmapViewOfSection", "NtWriteVirtualMemory", "NtReadVirtualMemory", "NtAllocateVirtualMemory", "VirtualProtectEx", "OpenProcess", "NtOpenProcess", "NtResumeThread", "SetWindowsHookEx", "UnhookWindowsHookEx"]
+    },
+    "memory_manipulation": {
+      "level": "high",
+      "description": "内存操作（动态申请可执行内存、修改内存属性，常见于脱壳/Shellcode 执行）",
+      "attack": "T1055",
+      "apis": ["VirtualAlloc", "VirtualProtect", "HeapCreate", "HeapAlloc", "NtProtectVirtualMemory", "ZwProtectVirtualMemory", "RtlMoveMemory", "MapViewOfFile", "CreateFileMappingW", "CreateFileMappingA", "NtCreateSection", "UpdateResource", "LoadLibraryA", "GetProcAddress"]
+    },
+    "anti_debug": {
+      "level": "high",
+      "description": "反调试（检测调试器、时间差检测、异常处理反调试）",
+      "attack": "T1622",
+      "apis": ["IsDebuggerPresent", "CheckRemoteDebuggerPresent", "NtQueryInformationProcess", "OutputDebugStringA", "OutputDebugStringW", "GetTickCount", "GetTickCount64", "QueryPerformanceCounter", "NtSetInformationThread", "NtQueryObject", "NtQuerySystemInformation", "SetUnhandledExceptionFilter", "RaiseException", "RtlAddVectoredExceptionHandler", "AddVectoredExceptionHandler", "ZwQueryInformationProcess", "DebugActiveProcess", "NtClose"]
+    },
+    "anti_vm_sandbox": {
+      "level": "high",
+      "description": "反虚拟机/反沙箱（探测虚拟化痕迹、硬件指纹、沙箱环境）",
+      "attack": "T1497",
+      "apis": ["GetSystemFirmwareTable", "EnumSystemFirmwareTables", "GetAdaptersInfo", "GetAdaptersAddresses", "SetupDiGetDeviceRegistryPropertyW", "GetVolumeInformationW", "GetDiskFreeSpaceExW", "GlobalMemoryStatusEx", "GetSystemInfo", "GetComputerNameW", "GetUserNameW", "EnumWindows", "GetForegroundWindow", "GetCursorPos", "GetSystemMetrics", "CreateToolhelp32Snapshot", "Process32FirstW", "Process32NextW"]
+    },
+    "network_c2": {
+      "level": "high",
+      "description": "网络通信与 C2 外联（套接字、HTTP、下载执行、隧道）",
+      "attack": "T1071",
+      "apis": ["WSAStartup", "socket", "connect", "send", "recv", "bind", "listen", "accept", "gethostbyname", "getaddrinfo", "inet_addr", "inet_ntoa", "InternetOpenA", "InternetOpenW", "InternetOpenUrlA", "InternetOpenUrlW", "InternetConnectA", "InternetConnectW", "HttpOpenRequestA", "HttpOpenRequestW", "HttpSendRequestA", "HttpSendRequestW", "InternetReadFile", "InternetWriteFile", "URLDownloadToFileA", "URLDownloadToFileW", "WinHttpOpen", "WinHttpConnect", "WinHttpSendRequest", "WinHttpReceiveResponse", "WinHttpReadData", "WSAConnect", "WSASend", "WSARecv", "closesocket"]
+    },
+    "persistence_registry": {
+      "level": "high",
+      "description": "注册表持久化（Run 键、服务、映像劫持、COM 劫持）",
+      "attack": "T1547",
+      "apis": ["RegCreateKeyExA", "RegCreateKeyExW", "RegSetValueExA", "RegSetValueExW", "RegOpenKeyExA", "RegOpenKeyExW", "RegDeleteValueA", "RegDeleteValueW", "RegDeleteKeyA", "RegDeleteKeyW", "RegQueryValueExA", "RegQueryValueExW", "RegSaveKeyW", "SHSetValueW", "RegSetKeyValueW"]
+    },
+    "persistence_service": {
+      "level": "high",
+      "description": "服务/计划任务/启动目录持久化",
+      "attack": "T1543",
+      "apis": ["CreateServiceA", "CreateServiceW", "OpenSCManagerA", "OpenSCManagerW", "OpenServiceA", "OpenServiceW", "StartServiceA", "StartServiceW", "ChangeServiceConfigA", "ChangeServiceConfigW", "ControlService", "NetScheduleJobAdd", "SchRpcRegisterTask", "CopyFileA", "CopyFileW", "MoveFileExA", "MoveFileExW", "MoveFileWithProgressW", "WriteFile", "SHFileOperationW", "SetFileAttributesW"]
+    },
+    "file_encryption_ransomware": {
+      "level": "critical",
+      "description": "文件加密/勒索行为（加密 API、批量文件操作、卷影删除）",
+      "attack": "T1486",
+      "apis": ["CryptEncrypt", "CryptGenKey", "CryptAcquireContextA", "CryptAcquireContextW", "CryptDeriveKey", "CryptImportKey", "CryptExportKey", "CryptGenRandom", "BCryptEncrypt", "BCryptGenerateSymmetricKey", "BCryptOpenAlgorithmProvider", "EncryptFileA", "EncryptFileW", "FindFirstFileA", "FindFirstFileW", "FindNextFileA", "FindNextFileW", "SetEndOfFile", "DeviceIoControl"]
+    },
+    "defense_evasion": {
+      "level": "high",
+      "description": "防御规避（关闭安全软件、删除卷影、篡改安全策略、自删除）",
+      "attack": "T1562",
+      "apis": ["TerminateProcess", "NtTerminateProcess", "ShellExecuteA", "ShellExecuteW", "ShellExecuteExW", "WinExec", "CreateProcessA", "CreateProcessW", "DeleteFileA", "DeleteFileW", "GetModuleFileNameA", "GetModuleFileNameW", "SetFileTime", "SetFileAttributesA", "EmptyWorkingSet", "SetProcessWorkingSetSize"]
+    },
+    "credential_access": {
+      "level": "critical",
+      "description": "凭据获取（键盘记录、截屏、LSASS 读取、浏览器凭据）",
+      "attack": "T1056",
+      "apis": ["GetAsyncKeyState", "GetKeyState", "GetKeyboardState", "GetForegroundWindow", "GetWindowTextA", "GetWindowTextW", "GetClipboardData", "OpenClipboard", "BitBlt", "GetDC", "CreateCompatibleDC", "MiniDumpWriteDump", "CredEnumerateA", "CredEnumerateW", "LsaEnumerateLogonSessions"]
+    },
+    "privilege_escalation": {
+      "level": "high",
+      "description": "提权与令牌操作（调整权限、窃取令牌、模拟登录）",
+      "attack": "T1134",
+      "apis": ["AdjustTokenPrivileges", "OpenProcessToken", "OpenThreadToken", "DuplicateTokenEx", "ImpersonateLoggedOnUser", "SetTokenInformation", "LookupPrivilegeValueA", "LookupPrivilegeValueW", "AllocateAndInitializeSid", "CreateProcessAsUserW", "LogonUserA", "LogonUserW", "SetThreadToken", "CreateProcessWithLogonW"]
+    },
+    "discovery": {
+      "level": "medium",
+      "description": "主机/系统信息探测（枚举进程、文件、账户、网络）",
+      "attack": "T1082",
+      "apis": ["NetUserEnum", "NetLocalGroupEnum", "NetShareEnum", "GetLogicalDrives", "GetDriveTypeA", "GetDriveTypeW", "GetSystemDirectoryA", "GetSystemDirectoryW", "GetWindowsDirectoryA", "GetWindowsDirectoryW", "GetComputerNameA", "GetComputerNameW", "GetUserNameA", "GetEnvironmentVariableA", "GetEnvironmentVariableW"]
+    },
+    "execution_shell": {
+      "level": "high",
+      "description": "命令执行/脚本宿主（调用 CMD、PowerShell、WScript、MSHTA）",
+      "attack": "T1059",
+      "apis": ["system", "popen", "_popen", "CoCreateInstance", "OleCreateFromFile", "RtlCreateProcessReflection", "CreateProcessWithTokenW"]
+    },
+    "lateral_movement": {
+      "level": "high",
+      "description": "横向移动（SMB、WMI、远程服务、PsExec 风格）",
+      "attack": "T1021",
+      "apis": ["WNetAddConnection2A", "WNetAddConnection2W", "NetUseAdd", "NetShareAdd", "NetSessionEnum", "NetLocalGroupGetMembers", "IcmpSendEcho", "DnsQuery_A"]
+    },
+    "crypto": {
+      "level": "medium",
+      "description": "密码学操作（加解密、签名验证，可被勒索/窃密复用）",
+      "attack": "T1027",
+      "apis": ["CryptCreateHash", "CryptHashData", "CryptDecrypt", "BCryptDecrypt", "CryptStringToBinaryA", "CryptBinaryToStringA"]
+    },
+    "dynamic_resolution": {
+      "level": "medium",
+      "description": "动态解析/运行时加载（规避静态导入表检测，常见于加壳与混淆）",
+      "attack": "T1027.007",
+      "apis": ["LoadLibraryExA", "LoadLibraryExW", "LdrLoadDll", "LdrGetProcedureAddress", "GetModuleHandleA", "GetModuleHandleW", "RtlDecompressBuffer"]
+    }
+  },
+  "packer_signatures": [
+    {"name": "UPX", "category": "packer", "section_names": ["UPX0", "UPX1", "UPX2", ".UPX0", ".UPX1"], "description": "UPX 可执行压缩壳（开源，最常见）", "severity": "medium"},
+    {"name": "ASPack", "category": "packer", "section_names": [".aspack", ".adata", "aspack"], "description": "ASPack 压缩壳", "severity": "medium"},
+    {"name": "FSG", "category": "packer", "section_names": [".fsg", "FSG!"], "description": "FSG 快速小型壳", "severity": "medium"},
+    {"name": "PECompact", "category": "packer", "section_names": ["PEC2", "PECompact2", ".pec"], "description": "PECompact 压缩壳", "severity": "medium"},
+    {"name": "MPRESS", "category": "packer", "section_names": [".MPRESS1", ".MPRESS2"], "description": "MPRESS 压缩壳", "severity": "medium"},
+    {"name": "Themida", "category": "protector", "section_names": [".themida", ".winlice"], "description": "Themida/WinLicense 商业虚拟机保护壳（强混淆，反调试）", "severity": "high"},
+    {"name": "VMProtect", "category": "protector", "section_names": [".vmp0", ".vmp1", ".vmp2"], "description": "VMProtect 虚拟机保护壳（代码虚拟化，极难脱壳）", "severity": "high"},
+    {"name": "Enigma", "category": "protector", "section_names": [".enigma1", ".enigma2"], "description": "Enigma Protector 保护壳", "severity": "high"},
+    {"name": "Obsidium", "category": "protector", "section_names": [".obsidium"], "description": "Obsidium 保护壳", "severity": "high"},
+    {"name": "Armadillo", "category": "protector", "section_names": [".data1"], "description": "Armadillo (SoftwarePassport) 保护壳", "severity": "high"},
+    {"name": "Petite", "category": "packer", "section_names": [".petite", "petite"], "description": "Petite 压缩壳", "severity": "medium"},
+    {"name": "NsPack", "category": "packer", "section_names": [".nsp0", ".nsp1", ".nsp2"], "description": "NsPack 压缩壳", "severity": "medium"},
+    {"name": "MoleBox", "category": "packer", "section_names": [".molebox"], "description": "MoleBox 打包器", "severity": "medium"},
+    {"name": "Yoda", "category": "protector", "section_names": [".yP", ".y0da"], "description": "Yoda Crypter 保护壳", "severity": "medium"}
+  ],
+  "packer_heuristics": {"high_entropy_threshold": 7.2, "tiny_import_dll_threshold": 3, "tiny_import_func_threshold": 15},
+  "string_patterns": [
+    {"name": "url", "regex": "\\b(?:https?|ftp|tcp|udp|ws|wss)://[A-Za-z0-9\\-._~:/?#\\[\\]@!$&'()*+,;=%]{4,2048}", "level": "medium", "desc": "URL 地址（可能为 C2 或下载源）"},
+    {"name": "ipv4", "regex": "\\b(?:(?:25[0-5]|2[0-4]\\d|1?\\d?\\d)\\.){3}(?:25[0-5]|2[0-4]\\d|1?\\d?\\d)\\b", "level": "medium", "desc": "IPv4 地址"},
+    {"name": "domain", "regex": "\\b(?:[a-zA-Z0-9](?:[a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+(?:com|net|org|cn|ru|top|xyz|info|biz|io|cc|tk|ml|ga|gq|pw|onion|su|me|club|online|site|space|live|icu|shop|vip)\\b", "level": "medium", "desc": "域名"},
+    {"name": "email", "regex": "\\b[A-Za-z0-9._%+\\-]+@[A-Za-z0-9.\\-]+\\.[A-Za-z]{2,}\\b", "level": "low", "desc": "邮箱地址"},
+    {"name": "windows_path", "regex": "(?:[A-Za-z]:\\\\|\\\\\\\\\\?\\\\|\\\\\\\\)(?:[^\\\\/:*?\"<>|\\r\\n]{1,255}\\\\)*[^\\\\/:*?\"<>|\\r\\n]{1,255}", "level": "low", "desc": "Windows 文件路径"},
+    {"name": "registry_key", "regex": "(?:HKEY_[A-Z_]+|HKLM|HKCU|HKCR|HKU|HKCC)\\\\[A-Za-z0-9_\\\\ .\\-{}/]{3,255}", "level": "medium", "desc": "注册表路径"},
+    {"name": "useragent", "regex": "Mozilla/[45]\\.0 \\([^)]+\\)[^\\r\\n]{0,200}", "level": "low", "desc": "User-Agent 指纹"},
+    {"name": "cmdline", "regex": "(?:cmd(?:\\.exe)?\\s+/c|powershell(?:\\.exe)?\\s+|wscript(?:\\.exe)?\\s+|cscript(?:\\.exe)?\\s+|mshta(?:\\.exe)?\\s+|rundll32(?:\\.exe)?\\s+|regsvr32(?:\\.exe)?\\s+|bitsadmin\\s+|certutil\\s+)[^\\r\\n]{0,500}", "level": "high", "desc": "可疑命令行/脚本宿主调用"},
+    {"name": "mutex", "regex": "(?:Global|Local)\\\\[A-Za-z0-9_\\-{}.]{4,128}", "level": "medium", "desc": "互斥体名称（常作为感染标记）"},
+    {"name": "base64_blob", "regex": "(?<![A-Za-z0-9+/])[A-Za-z0-9+/]{40,}={0,2}(?![A-Za-z0-9+/])", "level": "medium", "desc": "疑似 Base64 编码数据块"},
+    {"name": "rsa_key_marker", "regex": "-----BEGIN (?:RSA )?(?:PUBLIC|PRIVATE) KEY-----", "level": "high", "desc": "内嵌 RSA 公私钥（勒索/后门常用）"},
+    {"name": "btc_wallet", "regex": "\\b(?:bc1[a-z0-9]{25,39}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})\\b", "level": "high", "desc": "比特币钱包地址（勒索赎金特征）"},
+    {"name": "ransom_note", "regex": "(?i)(your files have been encrypted|all your files|decrypt.{0,30}(bitcoin|payment)|recover your files)", "level": "critical", "desc": "勒索信文本特征"},
+    {"name": "powershell_enc", "regex": "(?i)powershell(?:\\.exe)?[^\\r\\n]{0,80}(?:-enc|-e |-encodedcommand|frombase64string)", "level": "high", "desc": "PowerShell 编码命令（常见于无文件攻击）"},
+    {"name": "persistence_run", "regex": "(?i)Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run(?:Once)?", "level": "high", "desc": "自启动注册表键"}
+  ],
+  "string_whitelist": ["Microsoft", "Windows", "System32", "Program Files", "kernel32.dll", "user32.dll", "advapi32.dll", "ntdll.dll", ".text", ".data", ".rdata", ".rsrc", "Rich", "This program cannot be run in DOS mode", "version.dll", "msvcrt.dll", "http://schemas.microsoft.com", "http://www.w3.org/2000/svg", "http://go.microsoft.com", "https://www.verisign.com", "syntax error", "assertion failed"],
+  "attack_mapping": {
+    "process_create": {"id": "T1106", "name": "Native API", "tactic": "Execution"},
+    "process_injection": {"id": "T1055", "name": "Process Injection", "tactic": "Defense Evasion"},
+    "remote_thread": {"id": "T1055.003", "name": "Thread Execution Hijacking", "tactic": "Defense Evasion"},
+    "process_hollowing": {"id": "T1055.012", "name": "Process Hollowing", "tactic": "Defense Evasion"},
+    "token_manipulation": {"id": "T1134", "name": "Access Token Manipulation", "tactic": "Privilege Escalation"},
+    "file_create": {"id": "T1105", "name": "Ingress Tool Transfer", "tactic": "Command and Control"},
+    "file_drop": {"id": "T1105", "name": "Ingress Tool Transfer", "tactic": "Command and Control"},
+    "file_delete": {"id": "T1070.004", "name": "File Deletion", "tactic": "Defense Evasion"},
+    "file_encrypt": {"id": "T1486", "name": "Data Encrypted for Impact", "tactic": "Impact"},
+    "ransomware_note": {"id": "T1486", "name": "Data Encrypted for Impact", "tactic": "Impact"},
+    "autorun_write": {"id": "T1547.001", "name": "Registry Run Keys / Startup Folder", "tactic": "Persistence"},
+    "registry_set": {"id": "T1112", "name": "Modify Registry", "tactic": "Defense Evasion"},
+    "registry_persistence": {"id": "T1547.001", "name": "Registry Run Keys", "tactic": "Persistence"},
+    "registry_service": {"id": "T1543.003", "name": "Windows Service", "tactic": "Persistence"},
+    "registry_hijack": {"id": "T1546.012", "name": "Image File Execution Options Injection", "tactic": "Persistence"},
+    "defense_evasion_registry": {"id": "T1562.001", "name": "Disable or Modify Tools", "tactic": "Defense Evasion"},
+    "network_connect": {"id": "T1071.001", "name": "Web Protocols", "tactic": "Command and Control"},
+    "dns_query": {"id": "T1071.004", "name": "DNS", "tactic": "Command and Control"},
+    "c2_beacon": {"id": "T1071", "name": "Application Layer Protocol", "tactic": "Command and Control"},
+    "http_request": {"id": "T1071.001", "name": "Web Protocols", "tactic": "Command and Control"},
+    "dga_domain": {"id": "T1568.002", "name": "Domain Generation Algorithms", "tactic": "Command and Control"},
+    "data_exfil": {"id": "T1041", "name": "Exfiltration Over C2 Channel", "tactic": "Exfiltration"},
+    "download_exec": {"id": "T1105", "name": "Ingress Tool Transfer", "tactic": "Command and Control"},
+    "antidebug": {"id": "T1622", "name": "Debugger Evasion", "tactic": "Defense Evasion"},
+    "antivm": {"id": "T1497.001", "name": "System Checks", "tactic": "Defense Evasion"},
+    "sandbox_evasion": {"id": "T1497", "name": "Virtualization/Sandbox Evasion", "tactic": "Defense Evasion"},
+    "time_evasion": {"id": "T1497.003", "name": "Time Based Evasion", "tactic": "Defense Evasion"},
+    "self_delete": {"id": "T1070.004", "name": "Indicator Removal: File Deletion", "tactic": "Defense Evasion"},
+    "keylogging": {"id": "T1056.001", "name": "Keylogging", "tactic": "Collection"},
+    "screenshot": {"id": "T1113", "name": "Screen Capture", "tactic": "Collection"},
+    "credential_dump": {"id": "T1003", "name": "OS Credential Dumping", "tactic": "Credential Access"},
+    "system_discovery": {"id": "T1082", "name": "System Information Discovery", "tactic": "Discovery"},
+    "process_discovery": {"id": "T1057", "name": "Process Discovery", "tactic": "Discovery"},
+    "command_exec": {"id": "T1059", "name": "Command and Scripting Interpreter", "tactic": "Execution"},
+    "wmi_exec": {"id": "T1047", "name": "Windows Management Instrumentation", "tactic": "Execution"}
+  },
+  "permissions": [
+    {"code": "sample:upload", "name": "上传样本", "module": "样本库"},
+    {"code": "sample:read", "name": "查看样本", "module": "样本库"},
+    {"code": "sample:download", "name": "下载样本（需二次授权）", "module": "样本库"},
+    {"code": "sample:delete", "name": "删除样本", "module": "样本库"},
+    {"code": "analysis:run", "name": "发起分析任务", "module": "分析引擎"},
+    {"code": "analysis:read", "name": "查看分析结果", "module": "分析引擎"},
+    {"code": "sandbox:run", "name": "执行动态沙箱分析", "module": "分析引擎"},
+    {"code": "ioc:read", "name": "查看威胁指标", "module": "威胁情报"},
+    {"code": "ioc:export", "name": "导出威胁指标", "module": "威胁情报"},
+    {"code": "report:read", "name": "查看报告", "module": "威胁情报"},
+    {"code": "report:generate", "name": "生成报告", "module": "威胁情报"},
+    {"code": "rule:manage", "name": "管理检测规则", "module": "规则库"},
+    {"code": "user:manage", "name": "用户与权限管理", "module": "权限"},
+    {"code": "audit:read", "name": "查看审计日志", "module": "权限"}
+  ],
+  "default_roles": [
+    {"name": "超级管理员", "description": "拥有平台全部权限", "permissions": ["*"]},
+    {"name": "安全分析员", "description": "可上传样本、发起静态/动态分析、提取威胁指标并生成报告", "permissions": ["sample:upload", "sample:read", "sample:download", "analysis:run", "analysis:read", "sandbox:run", "ioc:read", "ioc:export", "report:read", "report:generate"]},
+    {"name": "研判员", "description": "只读样本与分析结果，可导出情报", "permissions": ["sample:read", "analysis:read", "ioc:read", "ioc:export", "report:read"]},
+    {"name": "审计员", "description": "查看审计日志与只读样本信息", "permissions": ["sample:read", "analysis:read", "audit:read", "report:read"]}
+  ],
+  "default_admin": {"username": "admin", "password": "Admin@123456", "email": "admin@malscope.local", "display_name": "系统管理员"}
+}

@@ -1,0 +1,49 @@
+# ================= 后端分析引擎依赖 =================
+# Web 框架
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+python-multipart==0.0.17
+pydantic==2.10.3
+pydantic-settings==2.6.1
+
+# 数据库 / ORM / 迁移
+SQLAlchemy==2.0.36
+PyMySQL==1.1.1
+alembic==1.14.0
+
+# 认证 / 加密
+PyJWT==2.10.1
+passlib[bcrypt]==1.7.4
+bcrypt==4.2.1
+cryptography==44.0.0
+
+# 任务队列 / 缓存
+redis==5.2.1
+celery==5.4.0
+
+# ---- 静态分析（网安核心）----
+pefile==2024.8.26
+lief==0.15.1
+capstone==5.0.3
+yara-python==4.5.1
+pyelftools==0.31
+oletools==0.60.2
+python-magic==0.4.27; sys_platform != "win32"
+regex==2024.11.6
+
+# ---- 动态行为 / 取证 ----
+psutil==6.1.0
+pywin32==308; sys_platform == "win32"
+
+# ---- 网络捕获 / 模拟 ----
+scapy==2.6.1
+dnspython==2.7.0
+
+# ---- 威胁情报格式 / 报表 ----
+stix2==3.0.1
+jinja2==3.1.4
+reportlab==4.2.5
+
+# ---- 工具 ----
+requests==2.32.3
+python-dateutil==2.9.0.post0
